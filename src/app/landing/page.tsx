@@ -1,4 +1,5 @@
 "use client";
+import { Controller } from "@/components/controller";
 import { drawCoordinateGrid } from "@/utils/drawCoordinateGrid";
 import { useEffect, useRef, useState } from "react";
 
@@ -80,8 +81,7 @@ const Landing = () => {
         id="controls-container"
         className="flex flex-1 flex-col items-center justify-center border-2 border-red-500"
       >
-        <h1 className="text-4xl font-bold">Welcome to the Landing Page</h1>
-        <p className="text-lg">This is the landing page for the website</p>
+        <Controller />
       </div>
     </div>
   );
