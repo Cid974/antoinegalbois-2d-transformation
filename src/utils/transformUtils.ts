@@ -5,35 +5,65 @@ interface RotateRectangleParams {
   rotation: number
 }
 
+interface ApplyCompleteTransformationParams {
+  canvasContext: CanvasRenderingContext2D
+  rectangleOriginCoordinates: {x: number; y: number}
+  canvasOriginCoordinates: {x: number; y: number}
+  translation: {x: number; y: number}
+  rotation: number
+  pivot?: {x: number; y: number}
+}
+
 interface RetrieveRectangleCornersParams {
   rectangleOriginCoordinates: {x: number; y: number}
   rectangleSize: {width: number; height: number}
   rotation: number
 }
 
-const rotateRectangle = ({
+const applyCompleteTransformation = ({
   canvasContext,
   rectangleOriginCoordinates,
   canvasOriginCoordinates,
+  translation,
   rotation,
-}: RotateRectangleParams) => {
+  pivot,
+}: ApplyCompleteTransformationParams) => {
   const angle = -rotation * (Math.PI / 180)
 
   const cos = Math.cos(angle)
   const sin = Math.sin(angle)
 
-  const canvasOriginX = canvasOriginCoordinates.x + rectangleOriginCoordinates.x
-  const canvasOriginY = canvasOriginCoordinates.y - rectangleOriginCoordinates.y
+  const canvasOriginX = canvasOriginCoordinates.x
+  const canvasOriginY = canvasOriginCoordinates.y
 
-  canvasContext.setTransform(
-    cos,
-    sin,
-    -sin,
-    cos,
-    canvasOriginX - canvasOriginX * cos + canvasOriginY * sin,
-    canvasOriginY - canvasOriginX * sin - canvasOriginY * cos,
-  )
+  const rotationOriginX = pivot
+    ? canvasOriginX + rectangleOriginCoordinates.x + pivot.x
+    : canvasOriginX + rectangleOriginCoordinates.x
+  const rotationOriginY = pivot
+    ? canvasOriginY - rectangleOriginCoordinates.y - pivot.y
+    : canvasOriginY - rectangleOriginCoordinates.y
+
+  const translatedOriginX = translation.x
+  const translatedOriginY = -translation.y
+
+  const a = cos
+  const b = sin
+  const c = -sin
+  const d = cos
+  const e =
+    translatedOriginX +
+    rotationOriginX -
+    rotationOriginX * cos +
+    rotationOriginY * sin
+  const f =
+    translatedOriginY +
+    rotationOriginY -
+    rotationOriginX * sin -
+    rotationOriginY * cos
+
+  canvasContext.setTransform(a, b, c, d, e, f)
 }
+
 
 const retrieveRectangleCorners = ({
   rectangleOriginCoordinates,
@@ -85,8 +115,8 @@ const retrieveRectangleCorners = ({
 }
 
 const transformUtils = {
-  rotateRectangle,
   retrieveRectangleCorners,
+  applyCompleteTransformation,
 }
 
 export default transformUtils

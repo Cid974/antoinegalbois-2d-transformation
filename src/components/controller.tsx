@@ -52,7 +52,6 @@ const Controller = ({
       [name]: value,
     }))
 
-    // Clear error for this field when user starts typing
     if (errors[name as keyof ValidationErrors]) {
       setErrors(prev => ({
         ...prev,
@@ -92,7 +91,6 @@ const Controller = ({
       })
       setErrors(fieldErrors)
     } else {
-      // Form is valid
       setErrors({})
 
       const transformedData = {

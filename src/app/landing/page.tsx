@@ -32,6 +32,21 @@ const Landing = () => {
     })
   }
 
+  const drawOrigin = (originX: number, originY: number) => {
+    const ctx = canvasRef.current?.getContext('2d')
+    if (!ctx) {
+      return
+    }
+
+    const centerX = ctx.canvas.width / 2
+    const centerY = ctx.canvas.height / 2
+
+    const originPositionX = centerX + originX
+    const originPositionY = centerY - originY
+
+    drawUtils.drawOrigin(ctx, originPositionX, originPositionY, 'red')
+  }
+
   const handleSubmitChanges = (params: TransformationData) => {
     console.log(params)
 
@@ -62,47 +77,57 @@ const Landing = () => {
 
     ctx.save()
 
-    const angle = -rotation * (Math.PI / 180)
+    if (pivotX !== 0 || pivotY !== 0) {
+      transformUtils.applyCompleteTransformation({
+        canvasContext: ctx,
+        rectangleOriginCoordinates,
+        canvasOriginCoordinates: {
+          x: canvasRef.current.width / 2,
+          y: canvasRef.current.height / 2,
+        },
+        translation: {x: positionX, y: positionY},
+        rotation,
+        pivot: {x: pivotX, y: pivotY},
+      })
 
-    const cos = Math.cos(angle)
-    const sin = Math.sin(angle)
+      drawRectangle(rectangleOriginCoordinates.x, rectangleOriginCoordinates.y)
 
-    const canvasOriginX = canvasRef.current.width / 2
-    const canvasOriginY = canvasRef.current.height / 2
+      const currentRectangleOriginX = rectangleOriginCoordinates.x + positionX
+      const currentRectangleOriginY = rectangleOriginCoordinates.y + positionY
+      const absolutePivotX = currentRectangleOriginX + pivotX
+      const absolutePivotY = currentRectangleOriginY + pivotY
+      drawOrigin(absolutePivotX, absolutePivotY)
 
-    const rotationOriginX = canvasOriginX + rectangleOriginCoordinates.x
-    const rotationOriginY = canvasOriginY - rectangleOriginCoordinates.y
+      ctx.restore()
 
-    const translatedOriginX = positionX
-    const translatedOriginY = -positionY
-
-    const a = cos
-    const b = sin
-    const c = -sin
-    const d = cos
-    const e =
-      translatedOriginX +
-      rotationOriginX -
-      rotationOriginX * cos +
-      rotationOriginY * sin
-    const f =
-      translatedOriginY +
-      rotationOriginY -
-      rotationOriginX * sin -
-      rotationOriginY * cos
-
-    ctx.setTransform(a, b, c, d, e, f)
-
-    drawRectangle(rectangleOriginCoordinates.x, rectangleOriginCoordinates.y)
-
-    ctx.restore()
-
-    if (positionX !== 0 || positionY !== 0) {
       setRectangleOriginCoordinates({
         x: positionX + rectangleOriginCoordinates.x,
         y: positionY + rectangleOriginCoordinates.y,
       })
+
+      return
     }
+
+    transformUtils.applyCompleteTransformation({
+      canvasContext: ctx,
+      rectangleOriginCoordinates,
+      canvasOriginCoordinates: {
+        x: canvasRef.current.width / 2,
+        y: canvasRef.current.height / 2,
+      },
+      translation: {x: positionX, y: positionY},
+      rotation,
+    })
+
+    drawRectangle(rectangleOriginCoordinates.x, rectangleOriginCoordinates.y)
+    drawOrigin(rectangleOriginCoordinates.x, rectangleOriginCoordinates.y)
+
+    ctx.restore()
+
+    setRectangleOriginCoordinates({
+      x: positionX + rectangleOriginCoordinates.x,
+      y: positionY + rectangleOriginCoordinates.y,
+    })
   }
 
   useEffect(() => {
@@ -156,6 +181,11 @@ const Landing = () => {
     })
 
     drawRectangle(
+      DEFAULT_RECTANGLE_ORIGIN_COORDINATES.x,
+      DEFAULT_RECTANGLE_ORIGIN_COORDINATES.y,
+    )
+
+    drawOrigin(
       DEFAULT_RECTANGLE_ORIGIN_COORDINATES.x,
       DEFAULT_RECTANGLE_ORIGIN_COORDINATES.y,
     )

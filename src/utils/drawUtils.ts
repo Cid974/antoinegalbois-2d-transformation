@@ -147,7 +147,7 @@ const drawRectangle = ({canvasContext, width, height, positionX, positionY}: Dra
   canvasContext.fillStyle = "lightgray";
   canvasContext.fillRect(canvasX, canvasY, width, height);
 
-  drawOrigin(canvasContext, canvasX, canvasY + height, "red");
+  // drawOrigin(canvasContext, canvasX, canvasY + height, "red");
 }
 
 const clearOrigin = (canvasContext: CanvasRenderingContext2D, positionX: number, positionY: number) => {
@@ -179,6 +179,7 @@ const clearRectangle = (canvasContext: CanvasRenderingContext2D, positionX: numb
 const drawUtils = {
   drawCoordinateGrid,
   drawRectangle,
+  drawOrigin,
   clearRectangle,
   clearOrigin,
 };
