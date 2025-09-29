@@ -1,3 +1,5 @@
+import { STROKE_WIDTH } from "@/constants";
+
 interface CoordinateGridOptions {
   width: number;
   height: number;
@@ -28,7 +30,6 @@ interface DrawAxesParams {
   axisWidth: number;
   gridSpacing: number;
 }
-
 interface DrawRectangleParams {
   canvasContext: CanvasRenderingContext2D;
   width: number;
@@ -140,7 +141,7 @@ const drawRectangle = ({canvasContext, width, height, positionX, positionY}: Dra
 
 
   canvasContext.strokeStyle = "black";
-  canvasContext.lineWidth = 1;
+  canvasContext.lineWidth = STROKE_WIDTH;
   canvasContext.strokeRect(canvasX, canvasY, width, height);
   
   canvasContext.fillStyle = "lightgray";
@@ -149,7 +150,11 @@ const drawRectangle = ({canvasContext, width, height, positionX, positionY}: Dra
   drawOrigin(canvasContext, canvasX, canvasY + height, "red");
 }
 
-const clearGridRectangle = (canvasContext: CanvasRenderingContext2D, positionX: number, positionY: number, width: number, height: number) => {
+const clearOrigin = (canvasContext: CanvasRenderingContext2D, positionX: number, positionY: number) => {
+  canvasContext.clearRect(positionX - 3, positionY - 3, 6, 6);
+}
+
+const clearRectangle = (canvasContext: CanvasRenderingContext2D, positionX: number, positionY: number, width: number, height: number) => {
 
   const centerX = canvasContext.canvas.width / 2;
   const centerY = canvasContext.canvas.height / 2;
@@ -157,13 +162,25 @@ const clearGridRectangle = (canvasContext: CanvasRenderingContext2D, positionX: 
   const canvasX = centerX + positionX;
   const canvasY = centerY - positionY - height;
 
-  canvasContext.clearRect(canvasX, canvasY, width, height);
+
+  canvasContext.clearRect(
+    canvasX - STROKE_WIDTH, 
+    canvasY - STROKE_WIDTH, 
+    width + (STROKE_WIDTH * 2), 
+    height + (STROKE_WIDTH * 2)
+  );
+  
+  const originX = canvasX;
+  const originY = canvasY + height;
+
+  clearOrigin(canvasContext, originX, originY);
 }
 
 const drawUtils = {
   drawCoordinateGrid,
   drawRectangle,
-  clearGridRectangle,
+  clearRectangle,
+  clearOrigin,
 };
 
 export default drawUtils;

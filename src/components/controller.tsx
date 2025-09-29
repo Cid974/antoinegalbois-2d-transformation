@@ -45,18 +45,21 @@ const Controller = ({
     }
 
     return [
-      {x: rectangleOriginCoordinates?.x, y: rectangleOriginCoordinates?.y},
+      {
+        x: rectangleOriginCoordinates?.x,
+        y: rectangleOriginCoordinates?.y + rectangleSize?.height,
+      },
+      {
+        x: rectangleOriginCoordinates?.x + rectangleSize?.width,
+        y: rectangleOriginCoordinates?.y + rectangleSize?.height,
+      },
       {
         x: rectangleOriginCoordinates?.x + rectangleSize?.width,
         y: rectangleOriginCoordinates?.y,
       },
       {
-        x: rectangleOriginCoordinates?.x + rectangleSize?.width,
-        y: rectangleOriginCoordinates?.y + rectangleSize?.height,
-      },
-      {
         x: rectangleOriginCoordinates?.x,
-        y: rectangleOriginCoordinates?.y + rectangleSize?.height,
+        y: rectangleOriginCoordinates?.y,
       },
     ]
   }, [rectangleOriginCoordinates, rectangleSize])
