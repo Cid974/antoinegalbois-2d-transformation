@@ -1,5 +1,5 @@
 "use client";
-import { Controller } from "@/components/controller";
+import Controller, { OnSubmitChangesParams } from "@/components/controller";
 import { drawCoordinateGrid } from "@/utils/drawCoordinateGrid";
 import { useEffect, useRef, useState } from "react";
 
@@ -7,6 +7,10 @@ const Landing = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+
+  const handleSubmitChanges = (params: OnSubmitChangesParams) => {
+    console.log(params);
+  };
 
   useEffect(() => {
     const updateCanvasSize = () => {
@@ -81,7 +85,7 @@ const Landing = () => {
         id="controls-container"
         className="flex flex-1 flex-col items-center justify-center border-2 border-red-500"
       >
-        <Controller />
+        <Controller onSubmitChanges={handleSubmitChanges} />
       </div>
     </div>
   );

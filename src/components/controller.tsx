@@ -1,7 +1,25 @@
 import { match } from "ts-pattern";
 import { useState } from "react";
 
-export const Controller = () => {
+type TransformationType = "position" | "pivot";
+
+type Axis = "x" | "y";
+
+export interface OnSubmitChangesParams {
+  position?: { x: number; y: number };
+  rotation?: number;
+  pivot?: { x: number; y: number };
+}
+
+interface ControllerProps {
+  originCoordinates?: { x: number; y: number };
+  onSubmitChanges: (params: OnSubmitChangesParams) => void;
+}
+
+const Controller = ({
+  originCoordinates,
+  onSubmitChanges,
+}: ControllerProps) => {
   const pointsCoordinates = [
     { x: 100, y: 100 },
     { x: 200, y: 200 },
@@ -9,44 +27,55 @@ export const Controller = () => {
     { x: 400, y: 400 },
   ];
 
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [rotation, setRotation] = useState(0);
-  const [pivot, setPivot] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0.0, y: 0.0 });
+  const [rotation, setRotation] = useState(0.0);
+  const [pivot, setPivot] = useState({ x: 0.0, y: 0.0 });
 
-  const handleInputChange = (axis: "x" | "y", value: string) => {
-    // Allow empty string, numbers, and decimal points
-    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-      setPosition((prev) => ({
-        ...prev,
-        [axis]: value === "" ? 0 : parseFloat(value) || 0,
-      }));
+  const handleCoordinateChange = ({
+    axis,
+    value,
+    transformationType,
+  }: {
+    axis: Axis;
+    value: string;
+    transformationType: TransformationType;
+  }) => {
+    const numValue = parseFloat(value) || 0;
+    const roundedValue = Math.round(numValue * 100) / 100;
+    if (transformationType === "position") {
+      setPosition({
+        ...position,
+        [axis]: roundedValue,
+      });
+
+      return;
     }
+
+    setPivot({
+      ...pivot,
+      [axis]: roundedValue,
+    });
   };
 
   const handleRotationChange = (value: string) => {
-    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-      setRotation(value === "" ? 0 : parseFloat(value) || 0);
-    }
+    const numValue = parseFloat(value) || 0;
+    const roundedValue = Math.round(numValue * 100) / 100;
+    setRotation(roundedValue);
   };
 
-  const handlePivotChange = (axis: "x" | "y", value: string) => {
-    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-      setPivot((prev) => ({
-        ...prev,
-        [axis]: value === "" ? 0 : parseFloat(value) || 0,
-      }));
-    }
-  };
-
-  const formatValue = (value: number): string => {
-    return value.toFixed(2);
+  const handleSubmitChanges = () => {
+    onSubmitChanges({
+      position,
+      rotation,
+      pivot,
+    });
   };
 
   return (
     <div className="flex flex-col border-2 border-gray-400 rounded-md p-10 gap-4">
       <div>
         <h1>Controller</h1>
-        <div>
+        <div className="w-full p-2 border-2 border-gray-300 rounded-md">
           {pointsCoordinates.map((point, index) => (
             <div key={index}>
               {match(index)
@@ -83,9 +112,16 @@ export const Controller = () => {
           <div className="flex flex-row gap-2 items-center">
             <h1>X</h1>
             <input
-              type="text"
-              value={formatValue(position.x)}
-              onChange={(e) => handleInputChange("x", e.target.value)}
+              type="number"
+              step="0.01"
+              value={position.x}
+              onChange={(e) =>
+                handleCoordinateChange({
+                  axis: "x",
+                  value: e.target.value,
+                  transformationType: "position",
+                })
+              }
               className="border border-gray-300 rounded px-2 py-1"
               placeholder="0.00"
             />
@@ -93,9 +129,16 @@ export const Controller = () => {
           <div className="flex flex-row gap-2 items-center">
             <h1>Y</h1>
             <input
-              type="text"
-              value={formatValue(position.y)}
-              onChange={(e) => handleInputChange("y", e.target.value)}
+              type="number"
+              step="0.01"
+              value={position.y}
+              onChange={(e) =>
+                handleCoordinateChange({
+                  axis: "y",
+                  value: e.target.value,
+                  transformationType: "position",
+                })
+              }
               className="border border-gray-300 rounded px-2 py-1"
               placeholder="0.00"
             />
@@ -105,11 +148,11 @@ export const Controller = () => {
       <div>
         <h1>Rotation</h1>
         <input
-          type="text"
-          value={formatValue(rotation)}
+          type="number"
+          step="0.01"
+          value={rotation}
           onChange={(e) => handleRotationChange(e.target.value)}
           className="border border-gray-300 rounded px-2 py-1"
-          placeholder="0.00"
         />
       </div>
       <div>
@@ -118,9 +161,16 @@ export const Controller = () => {
           <div className="flex flex-row gap-2 items-center">
             <h1>X</h1>
             <input
-              type="text"
-              value={formatValue(pivot.x)}
-              onChange={(e) => handlePivotChange("x", e.target.value)}
+              type="number"
+              step="0.01"
+              value={pivot.x}
+              onChange={(e) =>
+                handleCoordinateChange({
+                  axis: "x",
+                  value: e.target.value,
+                  transformationType: "pivot",
+                })
+              }
               className="border border-gray-300 rounded px-2 py-1"
               placeholder="0.00"
             />
@@ -128,15 +178,32 @@ export const Controller = () => {
           <div className="flex flex-row gap-2 items-center">
             <h1>Y</h1>
             <input
-              type="text"
-              value={formatValue(pivot.y)}
-              onChange={(e) => handlePivotChange("y", e.target.value)}
+              type="number"
+              step="0.01"
+              value={pivot.y}
+              onChange={(e) =>
+                handleCoordinateChange({
+                  axis: "y",
+                  value: e.target.value,
+                  transformationType: "pivot",
+                })
+              }
               className="border border-gray-300 rounded px-2 py-1"
               placeholder="0.00"
             />
           </div>
         </div>
       </div>
+      <div className="flex justify-center">
+        <button
+          className="border border-gray-300 w-full py-4 rounded-2xl"
+          onClick={handleSubmitChanges}
+        >
+          Apply
+        </button>
+      </div>
     </div>
   );
 };
+
+export default Controller;
