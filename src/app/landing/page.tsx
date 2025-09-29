@@ -51,53 +51,57 @@ const Landing = () => {
     const pivotX = parseFloat(params.pivotX)
     const pivotY = parseFloat(params.pivotY)
 
+    drawUtils.drawCoordinateGrid(ctx, {
+      width: canvasRef.current.width,
+      height: canvasRef.current.height,
+      axisWidth: 2,
+      axisColor: 'gray',
+      gridSpacing: 50,
+      gridWidth: 2,
+    })
+
+    ctx.save()
+
+    const angle = -rotation * (Math.PI / 180)
+
+    const cos = Math.cos(angle)
+    const sin = Math.sin(angle)
+
+    const canvasOriginX = canvasRef.current.width / 2
+    const canvasOriginY = canvasRef.current.height / 2
+
+    const rotationOriginX = canvasOriginX + rectangleOriginCoordinates.x
+    const rotationOriginY = canvasOriginY - rectangleOriginCoordinates.y
+
+    const translatedOriginX = positionX
+    const translatedOriginY = -positionY
+
+    const a = cos
+    const b = sin
+    const c = -sin
+    const d = cos
+    const e =
+      translatedOriginX +
+      rotationOriginX -
+      rotationOriginX * cos +
+      rotationOriginY * sin
+    const f =
+      translatedOriginY +
+      rotationOriginY -
+      rotationOriginX * sin -
+      rotationOriginY * cos
+
+    ctx.setTransform(a, b, c, d, e, f)
+
+    drawRectangle(rectangleOriginCoordinates.x, rectangleOriginCoordinates.y)
+
+    ctx.restore()
+
     if (positionX !== 0 || positionY !== 0) {
-      drawUtils.drawCoordinateGrid(ctx, {
-        width: canvasRef.current.width,
-        height: canvasRef.current.height,
-        axisWidth: 2,
-        axisColor: 'gray',
-        gridSpacing: 50,
-        gridWidth: 2,
-      })
-
-      ctx.save()
-
-      ctx.setTransform(1, 0, 0, 1, positionX, -positionY)
-
-      drawRectangle(rectangleOriginCoordinates.x, rectangleOriginCoordinates.y)
-
-      ctx.restore()
-
       setRectangleOriginCoordinates({
         x: positionX + rectangleOriginCoordinates.x,
         y: positionY + rectangleOriginCoordinates.y,
       })
-    }
-
-    if (rotation !== 0) {
-      drawUtils.drawCoordinateGrid(ctx, {
-        width: canvasRef.current.width,
-        height: canvasRef.current.height,
-        axisWidth: 2,
-        axisColor: 'gray',
-        gridSpacing: 50,
-        gridWidth: 2,
-      })
-
-      transformUtils.rotateRectangle({
-        canvasContext: ctx,
-        rectangleOriginCoordinates,
-        canvasOriginCoordinates: {
-          x: canvasRef.current.width / 2,
-          y: canvasRef.current.height / 2,
-        },
-        rotation,
-      })
-
-      drawRectangle(rectangleOriginCoordinates.x, rectangleOriginCoordinates.y)
-
-      ctx.restore()
     }
   }
 
@@ -169,19 +173,18 @@ const Landing = () => {
       <div
         id="canvas-container"
         ref={containerRef}
-        className="flex flex-1 border-2 border-blue-500"
+        className="flex flex-1"
         style={{height: 'calc(100% - 20px)'}}>
         <canvas
           id="canvas"
           ref={canvasRef}
           width={canvasSize.width}
           height={canvasSize.height}
-          className="border-2 border-red-500"
         />
       </div>
       <div
         id="controls-container"
-        className="flex flex-1 flex-col items-center justify-center border-2 border-red-500">
+        className="flex flex-1 flex-col items-center justify-center">
         <Controller
           onSubmitChanges={handleSubmitChanges}
           rectangleOriginCoordinates={rectangleOriginCoordinates}

@@ -17,8 +17,6 @@ const rotateRectangle = ({
   canvasOriginCoordinates,
   rotation,
 }: RotateRectangleParams) => {
-  canvasContext.save()
-
   const angle = -rotation * (Math.PI / 180)
 
   const cos = Math.cos(angle)
