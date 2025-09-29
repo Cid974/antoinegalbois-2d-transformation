@@ -59,7 +59,7 @@ const drawUnitMarks = ({canvasContext, width, height, centerX, centerY, gridSpac
     canvasContext.lineTo(x, centerY + tickLength / 2);
     canvasContext.stroke();
     
-    const unitValue = Math.round((x - centerX) / gridSpacing);
+    const unitValue = Math.round(x - centerX);
     canvasContext.fillText(unitValue.toString(), x, centerY + tickLength / 2 + 2);
   }
 
@@ -76,7 +76,7 @@ const drawUnitMarks = ({canvasContext, width, height, centerX, centerY, gridSpac
     canvasContext.lineTo(centerX + tickLength / 2, y);
     canvasContext.stroke();
     
-    const unitValue = -Math.round((y - centerY) / gridSpacing);
+    const unitValue = -Math.round(y - centerY);
     canvasContext.fillText(unitValue.toString(), centerX - tickLength / 2 - 2, y);
   }
 

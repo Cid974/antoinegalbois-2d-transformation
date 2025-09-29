@@ -1,10 +1,3 @@
-interface RotateRectangleParams {
-  canvasContext: CanvasRenderingContext2D
-  rectangleOriginCoordinates: {x: number; y: number}
-  canvasOriginCoordinates: {x: number; y: number}
-  rotation: number
-}
-
 interface ApplyCompleteTransformationParams {
   canvasContext: CanvasRenderingContext2D
   rectangleOriginCoordinates: {x: number; y: number}
@@ -63,7 +56,6 @@ const applyCompleteTransformation = ({
 
   canvasContext.setTransform(a, b, c, d, e, f)
 }
-
 
 const retrieveRectangleCorners = ({
   rectangleOriginCoordinates,
