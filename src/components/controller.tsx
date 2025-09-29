@@ -150,40 +150,44 @@ const Controller = ({
       <div>
         <h1>Position</h1>
         <div className="flex flex-row gap-2">
-          <div className="flex flex-row items-center gap-2">
-            <h1>X</h1>
-            <input
-              type="text"
-              id="positionX"
-              name="positionX"
-              value={formData.positionX}
-              onChange={handleChange}
-              placeholder="e.g., 10, 10.5, or -5.25"
-              className={`w-full rounded px-3 py-2 ${
-                errors.positionX
-                  ? 'border-2 border-red-500'
-                  : 'border border-gray-300'
-              }`}
-            />
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row items-center gap-2">
+              <h1>X</h1>
+              <input
+                type="text"
+                id="positionX"
+                name="positionX"
+                value={formData.positionX}
+                onChange={handleChange}
+                placeholder="e.g., 10, 10.5, or -5.25"
+                className={`w-full rounded px-3 py-2 ${
+                  errors.positionX
+                    ? 'border-2 border-red-500'
+                    : 'border border-gray-300'
+                }`}
+              />
+            </div>
             {errors.positionX && (
               <span className="text-xs text-red-500">{errors.positionX}</span>
             )}
           </div>
-          <div className="flex flex-row items-center gap-2">
-            <h1>Y</h1>
-            <input
-              type="text"
-              id="positionY"
-              name="positionY"
-              value={formData.positionY}
-              onChange={handleChange}
-              placeholder="e.g., 20, 20.5, or -15.75"
-              className={`w-full rounded px-3 py-2 ${
-                errors.positionY
-                  ? 'border-2 border-red-500'
-                  : 'border border-gray-300'
-              }`}
-            />
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row items-center gap-2">
+              <h1>Y</h1>
+              <input
+                type="text"
+                id="positionY"
+                name="positionY"
+                value={formData.positionY}
+                onChange={handleChange}
+                placeholder="e.g., 20, 20.5, or -15.75"
+                className={`w-full rounded px-3 py-2 ${
+                  errors.positionY
+                    ? 'border-2 border-red-500'
+                    : 'border border-gray-300'
+                }`}
+              />
+            </div>
             {errors.positionY && (
               <span className="text-xs text-red-500">{errors.positionY}</span>
             )}
@@ -212,40 +216,44 @@ const Controller = ({
       <div>
         <h1>Pivot</h1>
         <div className="flex flex-row gap-2">
-          <div className="flex flex-row items-center gap-2">
-            <h1>X</h1>
-            <input
-              type="text"
-              id="pivotX"
-              name="pivotX"
-              value={formData.pivotX}
-              onChange={handleChange}
-              placeholder="e.g., 10, 10.5, or -5.25"
-              className={`w-full rounded px-3 py-2 ${
-                errors.pivotX
-                  ? 'border-2 border-red-500'
-                  : 'border border-gray-300'
-              }`}
-            />
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row items-center gap-2">
+              <h1>X</h1>
+              <input
+                type="text"
+                id="pivotX"
+                name="pivotX"
+                value={formData.pivotX}
+                onChange={handleChange}
+                placeholder="e.g., 10, 10.5, or -5.25"
+                className={`w-full rounded px-3 py-2 ${
+                  errors.pivotX
+                    ? 'border-2 border-red-500'
+                    : 'border border-gray-300'
+                }`}
+              />
+            </div>
             {errors.pivotX && (
               <span className="text-xs text-red-500">{errors.pivotX}</span>
             )}
           </div>
-          <div className="flex flex-row items-center gap-2">
-            <h1>Y</h1>
-            <input
-              type="text"
-              id="pivotY"
-              name="pivotY"
-              value={formData.pivotY}
-              onChange={handleChange}
-              placeholder="e.g., 20, 20.5, or -15.75"
-              className={`w-full rounded px-3 py-2 ${
-                errors.pivotY
-                  ? 'border-2 border-red-500'
-                  : 'border border-gray-300'
-              }`}
-            />
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row items-center gap-2">
+              <h1>Y</h1>
+              <input
+                type="text"
+                id="pivotY"
+                name="pivotY"
+                value={formData.pivotY}
+                onChange={handleChange}
+                placeholder="e.g., 20, 20.5, or -15.75"
+                className={`w-full rounded px-3 py-2 ${
+                  errors.pivotY
+                    ? 'border-2 border-red-500'
+                    : 'border border-gray-300'
+                }`}
+              />
+            </div>
             {errors.pivotY && (
               <span className="text-xs text-red-500">{errors.pivotY}</span>
             )}
