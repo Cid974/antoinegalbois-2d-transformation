@@ -2,6 +2,7 @@ import {match} from 'ts-pattern'
 import {useMemo, useState} from 'react'
 import z from 'zod'
 import {transformationSchema} from '@/schema/transformationSchema'
+import transformUtils from '@/utils/transformUtils'
 
 export type TransformationData = z.infer<typeof transformationSchema>
 
@@ -44,28 +45,16 @@ const Controller = ({
       ]
     }
 
-    return [
-      {
-        x: rectangleOriginCoordinates?.x,
-        y: rectangleOriginCoordinates?.y + rectangleSize?.height,
-      },
-      {
-        x: rectangleOriginCoordinates?.x + rectangleSize?.width,
-        y: rectangleOriginCoordinates?.y + rectangleSize?.height,
-      },
-      {
-        x: rectangleOriginCoordinates?.x + rectangleSize?.width,
-        y: rectangleOriginCoordinates?.y,
-      },
-      {
-        x: rectangleOriginCoordinates?.x,
-        y: rectangleOriginCoordinates?.y,
-      },
-    ]
-  }, [rectangleOriginCoordinates, rectangleSize])
+    return transformUtils.retrieveRectangleCorners({
+      rectangleOriginCoordinates,
+      rectangleSize,
+      rotation: parseFloat(formData.rotation),
+    })
+  }, [formData.rotation, rectangleOriginCoordinates, rectangleSize])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {name, value} = e.target
+
     setFormData(prev => ({
       ...prev,
       [name]: value,

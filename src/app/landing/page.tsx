@@ -5,6 +5,7 @@ import {
   DEFAULT_RECTANGLE_SIZE,
 } from '@/constants'
 import drawUtils from '@/utils/drawUtils'
+import transformUtils from '@/utils/transformUtils'
 import {useEffect, useRef, useState} from 'react'
 
 const Landing = () => {
@@ -50,10 +51,7 @@ const Landing = () => {
     const pivotX = parseFloat(params.pivotX)
     const pivotY = parseFloat(params.pivotY)
 
-    if (
-      positionX !== rectangleOriginCoordinates.x ||
-      positionY !== rectangleOriginCoordinates.y
-    ) {
+    if (positionX !== 0 || positionY !== 0) {
       drawUtils.drawCoordinateGrid(ctx, {
         width: canvasRef.current.width,
         height: canvasRef.current.height,
@@ -75,6 +73,31 @@ const Landing = () => {
         x: positionX + rectangleOriginCoordinates.x,
         y: positionY + rectangleOriginCoordinates.y,
       })
+    }
+
+    if (rotation !== 0) {
+      drawUtils.drawCoordinateGrid(ctx, {
+        width: canvasRef.current.width,
+        height: canvasRef.current.height,
+        axisWidth: 2,
+        axisColor: 'gray',
+        gridSpacing: 50,
+        gridWidth: 2,
+      })
+
+      transformUtils.rotateRectangle({
+        canvasContext: ctx,
+        rectangleOriginCoordinates,
+        canvasOriginCoordinates: {
+          x: canvasRef.current.width / 2,
+          y: canvasRef.current.height / 2,
+        },
+        rotation,
+      })
+
+      drawRectangle(rectangleOriginCoordinates.x, rectangleOriginCoordinates.y)
+
+      ctx.restore()
     }
   }
 
