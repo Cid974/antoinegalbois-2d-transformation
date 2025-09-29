@@ -1,20 +1,22 @@
-import { match } from "ts-pattern";
-import { useMemo, useState } from "react";
+import {match} from 'ts-pattern'
+import {useMemo, useState} from 'react'
+import z from 'zod'
+import {transformationSchema} from '@/schema/transformationSchema'
 
-type TransformationType = "position" | "pivot";
+export type TransformationData = z.infer<typeof transformationSchema>
 
-type Axis = "x" | "y";
-
-export interface OnSubmitChangesParams {
-  position?: { x: number; y: number };
-  rotation?: number;
-  pivot?: { x: number; y: number };
+interface ValidationErrors {
+  positionX?: string
+  positionY?: string
+  rotation?: string
+  pivotX?: string
+  pivotY?: string
 }
 
 interface ControllerProps {
-  rectangleOriginCoordinates?: { x: number; y: number };
-  rectangleSize?: { width: number; height: number };
-  onSubmitChanges: (params: OnSubmitChangesParams) => void;
+  rectangleOriginCoordinates?: {x: number; y: number}
+  rectangleSize?: {width: number; height: number}
+  onSubmitChanges: (params: TransformationData) => void
 }
 
 const Controller = ({
@@ -22,22 +24,28 @@ const Controller = ({
   rectangleSize,
   onSubmitChanges,
 }: ControllerProps) => {
-  const [position, setPosition] = useState({ x: 0.0, y: 0.0 });
-  const [rotation, setRotation] = useState(0.0);
-  const [pivot, setPivot] = useState({ x: 0.0, y: 0.0 });
+  const [formData, setFormData] = useState<TransformationData>({
+    positionX: '',
+    positionY: '',
+    rotation: '0',
+    pivotX: '',
+    pivotY: '',
+  })
+
+  const [errors, setErrors] = useState<ValidationErrors>({})
 
   const pointsCoordinates = useMemo(() => {
     if (!rectangleOriginCoordinates || !rectangleSize) {
       return [
-        { x: 0, y: 0 },
-        { x: 0, y: 0 },
-        { x: 0, y: 0 },
-        { x: 0, y: 0 },
-      ];
+        {x: 0, y: 0},
+        {x: 0, y: 0},
+        {x: 0, y: 0},
+        {x: 0, y: 0},
+      ]
     }
 
     return [
-      { x: rectangleOriginCoordinates?.x, y: rectangleOriginCoordinates?.y },
+      {x: rectangleOriginCoordinates?.x, y: rectangleOriginCoordinates?.y},
       {
         x: rectangleOriginCoordinates?.x + rectangleSize?.width,
         y: rectangleOriginCoordinates?.y,
@@ -50,54 +58,62 @@ const Controller = ({
         x: rectangleOriginCoordinates?.x,
         y: rectangleOriginCoordinates?.y + rectangleSize?.height,
       },
-    ];
-  }, [rectangleOriginCoordinates, rectangleSize]);
+    ]
+  }, [rectangleOriginCoordinates, rectangleSize])
 
-  const handleCoordinateChange = ({
-    axis,
-    value,
-    transformationType,
-  }: {
-    axis: Axis;
-    value: string;
-    transformationType: TransformationType;
-  }) => {
-    const numValue = parseFloat(value) || 0;
-    const roundedValue = Math.round(numValue * 100) / 100;
-    if (transformationType === "position") {
-      setPosition({
-        ...position,
-        [axis]: roundedValue,
-      });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const {name, value} = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }))
 
-      return;
+    // Clear error for this field when user starts typing
+    if (errors[name as keyof ValidationErrors]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined,
+      }))
     }
+  }
 
-    setPivot({
-      ...pivot,
-      [axis]: roundedValue,
-    });
-  };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
 
-  const handleRotationChange = (value: string) => {
-    const numValue = parseFloat(value) || 0;
-    const roundedValue = Math.round(numValue * 100) / 100;
-    setRotation(roundedValue);
-  };
+    const result = transformationSchema.safeParse(formData)
 
-  const handleSubmitChanges = () => {
-    onSubmitChanges({
-      position,
-      rotation,
-      pivot,
-    });
-  };
+    if (!result.success) {
+      const fieldErrors: ValidationErrors = {}
+
+      result.error.issues.forEach(err => {
+        const field = err.path[0] as keyof ValidationErrors
+        fieldErrors[field] = err.message
+      })
+      setErrors(fieldErrors)
+    } else {
+      // Form is valid
+      setErrors({})
+      const transformedData = {
+        positionX: result.data.positionX
+          ? parseFloat(result.data.positionX)
+          : '0',
+        positionY: result.data.positionY
+          ? parseFloat(result.data.positionY)
+          : '0',
+        rotation: result.data.rotation ? parseFloat(result.data.rotation) : '0',
+        pivotX: result.data.pivotX ? parseFloat(result.data.pivotX) : '0',
+        pivotY: result.data.pivotY ? parseFloat(result.data.pivotY) : '0',
+      }
+
+      onSubmitChanges(transformedData as TransformationData)
+    }
+  }
 
   return (
-    <div className="flex flex-col border-2 border-gray-400 rounded-md p-10 gap-4">
+    <div className="flex flex-col gap-4 rounded-md border-2 border-gray-400 p-10">
       <div>
         <h1>Controller</h1>
-        <div className="w-full p-2 border-2 border-gray-300 rounded-md">
+        <div className="w-full rounded-md border-2 border-gray-300 p-2">
           {pointsCoordinates.map((point, index) => (
             <div key={index}>
               {match(index)
@@ -122,7 +138,7 @@ const Controller = ({
                   </p>
                 ))
                 .otherwise(() => {
-                  return null;
+                  return null
                 })}
             </div>
           ))}
@@ -131,101 +147,117 @@ const Controller = ({
       <div>
         <h1>Position</h1>
         <div className="flex flex-row gap-2">
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-row items-center gap-2">
             <h1>X</h1>
             <input
-              type="number"
-              step="0.01"
-              value={position.x}
-              onChange={(e) =>
-                handleCoordinateChange({
-                  axis: "x",
-                  value: e.target.value,
-                  transformationType: "position",
-                })
-              }
-              className="border border-gray-300 rounded px-2 py-1"
-              placeholder="0.00"
+              type="text"
+              id="positionX"
+              name="positionX"
+              value={formData.positionX}
+              onChange={handleChange}
+              placeholder="e.g., 10, 10.5, or -5.25"
+              className={`w-full rounded px-3 py-2 ${
+                errors.positionX
+                  ? 'border-2 border-red-500'
+                  : 'border border-gray-300'
+              }`}
             />
+            {errors.positionX && (
+              <span className="text-xs text-red-500">{errors.positionX}</span>
+            )}
           </div>
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-row items-center gap-2">
             <h1>Y</h1>
             <input
-              type="number"
-              step="0.01"
-              value={position.y}
-              onChange={(e) =>
-                handleCoordinateChange({
-                  axis: "y",
-                  value: e.target.value,
-                  transformationType: "position",
-                })
-              }
-              className="border border-gray-300 rounded px-2 py-1"
-              placeholder="0.00"
+              type="text"
+              id="positionY"
+              name="positionY"
+              value={formData.positionY}
+              onChange={handleChange}
+              placeholder="e.g., 20, 20.5, or -15.75"
+              className={`w-full rounded px-3 py-2 ${
+                errors.positionY
+                  ? 'border-2 border-red-500'
+                  : 'border border-gray-300'
+              }`}
             />
+            {errors.positionY && (
+              <span className="text-xs text-red-500">{errors.positionY}</span>
+            )}
           </div>
         </div>
       </div>
       <div>
         <h1>Rotation</h1>
         <input
-          type="number"
-          step="0.01"
-          value={rotation}
-          onChange={(e) => handleRotationChange(e.target.value)}
-          className="border border-gray-300 rounded px-2 py-1"
+          type="text"
+          id="rotation"
+          name="rotation"
+          value={formData.rotation}
+          onChange={handleChange}
+          placeholder="e.g., 45, 45.5, or -90.5"
+          className={`w-full rounded px-3 py-2 ${
+            errors.rotation
+              ? 'border-2 border-red-500'
+              : 'border border-gray-300'
+          }`}
         />
+        {errors.rotation && (
+          <span className="text-xs text-red-500">{errors.rotation}</span>
+        )}
       </div>
       <div>
         <h1>Pivot</h1>
         <div className="flex flex-row gap-2">
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-row items-center gap-2">
             <h1>X</h1>
             <input
-              type="number"
-              step="0.01"
-              value={pivot.x}
-              onChange={(e) =>
-                handleCoordinateChange({
-                  axis: "x",
-                  value: e.target.value,
-                  transformationType: "pivot",
-                })
-              }
-              className="border border-gray-300 rounded px-2 py-1"
-              placeholder="0.00"
+              type="text"
+              id="pivotX"
+              name="pivotX"
+              value={formData.pivotX}
+              onChange={handleChange}
+              placeholder="e.g., 10, 10.5, or -5.25"
+              className={`w-full rounded px-3 py-2 ${
+                errors.pivotX
+                  ? 'border-2 border-red-500'
+                  : 'border border-gray-300'
+              }`}
             />
+            {errors.pivotX && (
+              <span className="text-xs text-red-500">{errors.pivotX}</span>
+            )}
           </div>
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-row items-center gap-2">
             <h1>Y</h1>
             <input
-              type="number"
-              step="0.01"
-              value={pivot.y}
-              onChange={(e) =>
-                handleCoordinateChange({
-                  axis: "y",
-                  value: e.target.value,
-                  transformationType: "pivot",
-                })
-              }
-              className="border border-gray-300 rounded px-2 py-1"
-              placeholder="0.00"
+              type="text"
+              id="pivotY"
+              name="pivotY"
+              value={formData.pivotY}
+              onChange={handleChange}
+              placeholder="e.g., 20, 20.5, or -15.75"
+              className={`w-full rounded px-3 py-2 ${
+                errors.pivotY
+                  ? 'border-2 border-red-500'
+                  : 'border border-gray-300'
+              }`}
             />
+            {errors.pivotY && (
+              <span className="text-xs text-red-500">{errors.pivotY}</span>
+            )}
           </div>
         </div>
       </div>
       <div className="flex justify-center">
         <button
-          className="border border-gray-300 w-full py-4 rounded-2xl"
-          onClick={handleSubmitChanges}
-        >
+          className="w-full rounded-2xl border border-gray-300 py-4"
+          onClick={handleSubmit}>
           Apply
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Controller;
+export default Controller

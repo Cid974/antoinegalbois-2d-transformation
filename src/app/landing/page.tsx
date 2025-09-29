@@ -1,40 +1,45 @@
-"use client";
-import Controller, { OnSubmitChangesParams } from "@/components/controller";
-import drawUtils from "@/utils/drawUtils";
-import { useCallback, useEffect, useRef, useState } from "react";
+'use client'
+import Controller, {TransformationData} from '@/components/controller'
+import drawUtils from '@/utils/drawUtils'
+import {useCallback, useEffect, useRef, useState} from 'react'
 
 const DEFAULT_RECTANGLE_SIZE = {
   width: 100,
   height: 100,
-};
+}
 
 const DEFAULT_RECTANGLE_ORIGIN_COORDINATES = {
   x: 100,
   y: 100,
-};
+}
 
 const Landing = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+  const containerRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [canvasSize, setCanvasSize] = useState({width: 0, height: 0})
   const [rectangleOriginCoordinates, setRectangleOriginCoordinates] = useState({
     x: 100,
     y: 100,
-  });
+  })
 
   const handleSubmitChanges = useCallback(
-    (params: OnSubmitChangesParams) => {
-      console.log(params);
+    (params: TransformationData) => {
+      console.log(params)
 
-      const ctx = canvasRef.current?.getContext("2d");
+      const ctx = canvasRef.current?.getContext('2d')
       if (!ctx) {
-        return;
+        return
       }
 
+      const positionX = parseFloat(params.positionX)
+      const positionY = parseFloat(params.positionY)
+      const rotation = parseFloat(params.rotation)
+      const pivotX = parseFloat(params.pivotX)
+      const pivotY = parseFloat(params.pivotY)
+
       if (
-        params.position &&
-        params.position.x !== rectangleOriginCoordinates.x &&
-        params.position.y !== rectangleOriginCoordinates.y
+        positionX !== rectangleOriginCoordinates.x &&
+        positionY !== rectangleOriginCoordinates.y
       ) {
         drawUtils.clearGridRectangle(
           ctx,
@@ -42,29 +47,29 @@ const Landing = () => {
           rectangleOriginCoordinates.y,
           DEFAULT_RECTANGLE_SIZE.width,
           DEFAULT_RECTANGLE_SIZE.height,
-        );
+        )
 
         setRectangleOriginCoordinates({
-          x: params.position.x,
-          y: params.position.y,
-        });
+          x: positionX,
+          y: positionY,
+        })
 
         drawUtils.drawRectangle({
           canvasContext: ctx,
           width: DEFAULT_RECTANGLE_SIZE.width,
           height: DEFAULT_RECTANGLE_SIZE.height,
-          positionX: params.position.x,
-          positionY: params.position.y,
-        });
+          positionX: positionX,
+          positionY: positionY,
+        })
       }
     },
     [rectangleOriginCoordinates],
-  );
+  )
 
   const drawRectangle = () => {
-    const ctx = canvasRef.current?.getContext("2d");
+    const ctx = canvasRef.current?.getContext('2d')
     if (!ctx) {
-      return;
+      return
     }
 
     drawUtils.drawRectangle({
@@ -73,73 +78,71 @@ const Landing = () => {
       height: 100,
       positionX: DEFAULT_RECTANGLE_ORIGIN_COORDINATES.x,
       positionY: DEFAULT_RECTANGLE_ORIGIN_COORDINATES.y,
-    });
-  };
+    })
+  }
 
   useEffect(() => {
     const updateCanvasSize = () => {
       if (!containerRef.current) {
-        return;
+        return
       }
 
-      const rect = containerRef.current.getBoundingClientRect();
+      const rect = containerRef.current.getBoundingClientRect()
 
       setCanvasSize({
         width: rect.width,
         height: rect.height,
-      });
-    };
-
-    updateCanvasSize();
-
-    const resizeObserver = new ResizeObserver(updateCanvasSize);
-    if (!containerRef.current) {
-      return;
+      })
     }
 
-    resizeObserver.observe(containerRef.current);
+    updateCanvasSize()
 
-    window.addEventListener("resize", updateCanvasSize);
+    const resizeObserver = new ResizeObserver(updateCanvasSize)
+    if (!containerRef.current) {
+      return
+    }
+
+    resizeObserver.observe(containerRef.current)
+
+    window.addEventListener('resize', updateCanvasSize)
 
     return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateCanvasSize);
-    };
-  }, []);
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateCanvasSize)
+    }
+  }, [])
 
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = canvasRef.current
     if (!canvas) {
-      return;
+      return
     }
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d')
     if (!ctx) {
-      return;
+      return
     }
 
     drawUtils.drawCoordinateGrid(ctx, {
       width: canvas.width,
       height: canvas.height,
       axisWidth: 2,
-      axisColor: "gray",
+      axisColor: 'gray',
       gridSpacing: 50,
       gridWidth: 2,
-    });
+    })
 
-    drawRectangle();
-  }, [canvasSize, canvasRef]);
+    drawRectangle()
+  }, [canvasSize, canvasRef])
 
   return (
     <div
       id="container"
-      className="bg-white text-black flex flex-row items-center justify-center h-screen"
-    >
+      className="flex h-screen flex-row items-center justify-center bg-white text-black">
       <div
         id="canvas-container"
         ref={containerRef}
-        className="flex border-2 border-blue-500 flex-1"
-        style={{ height: "calc(100% - 20px)" }}
-      >
+        className="flex flex-1 border-2 border-blue-500"
+        style={{height: 'calc(100% - 20px)'}}>
         <canvas
           id="canvas"
           ref={canvasRef}
@@ -150,12 +153,15 @@ const Landing = () => {
       </div>
       <div
         id="controls-container"
-        className="flex flex-1 flex-col items-center justify-center border-2 border-red-500"
-      >
-        <Controller onSubmitChanges={handleSubmitChanges} />
+        className="flex flex-1 flex-col items-center justify-center border-2 border-red-500">
+        <Controller
+          onSubmitChanges={handleSubmitChanges}
+          rectangleOriginCoordinates={rectangleOriginCoordinates}
+          rectangleSize={DEFAULT_RECTANGLE_SIZE}
+        />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Landing;
+export default Landing
