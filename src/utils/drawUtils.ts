@@ -37,24 +37,6 @@ interface DrawRectangleParams {
   positionY: number;
 }
 
-
-const drawRectangle = ({canvasContext, width, height, positionX, positionY}: DrawRectangleParams) => {
-
-  const centerX = canvasContext.canvas.width / 2;
-  const centerY = canvasContext.canvas.height / 2;
-
-  const canvasX = centerX + positionX;
-  const canvasY = centerY - positionY - height;
-
-
-  canvasContext.strokeStyle = "black";
-  canvasContext.lineWidth = 1;
-  canvasContext.strokeRect(canvasX, canvasY, width, height);
-  
-  canvasContext.fillStyle = "lightgray";
-  canvasContext.fillRect(canvasX, canvasY, width, height);
-}
-
 const drawUnitMarks = ({canvasContext, width, height, centerX, centerY, gridSpacing, axisColor}: DrawUnitMarksParams) => {
   const tickLength = 8;
   const fontSize = 12;
@@ -148,9 +130,40 @@ const drawCoordinateGrid = (canvasContext: CanvasRenderingContext2D, options: Co
   drawOrigin(canvasContext, centerX, centerY, axisColor);
 };
 
+const drawRectangle = ({canvasContext, width, height, positionX, positionY}: DrawRectangleParams) => {
+
+  const centerX = canvasContext.canvas.width / 2;
+  const centerY = canvasContext.canvas.height / 2;
+
+  const canvasX = centerX + positionX;
+  const canvasY = centerY - positionY - height;
+
+
+  canvasContext.strokeStyle = "black";
+  canvasContext.lineWidth = 1;
+  canvasContext.strokeRect(canvasX, canvasY, width, height);
+  
+  canvasContext.fillStyle = "lightgray";
+  canvasContext.fillRect(canvasX, canvasY, width, height);
+
+  drawOrigin(canvasContext, canvasX, canvasY + height, "red");
+}
+
+const clearGridRectangle = (canvasContext: CanvasRenderingContext2D, positionX: number, positionY: number, width: number, height: number) => {
+
+  const centerX = canvasContext.canvas.width / 2;
+  const centerY = canvasContext.canvas.height / 2;
+
+  const canvasX = centerX + positionX;
+  const canvasY = centerY - positionY - height;
+
+  canvasContext.clearRect(canvasX, canvasY, width, height);
+}
+
 const drawUtils = {
   drawCoordinateGrid,
   drawRectangle,
+  clearGridRectangle,
 };
 
 export default drawUtils;

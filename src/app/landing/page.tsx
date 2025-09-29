@@ -1,15 +1,79 @@
 "use client";
 import Controller, { OnSubmitChangesParams } from "@/components/controller";
 import drawUtils from "@/utils/drawUtils";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+const DEFAULT_RECTANGLE_SIZE = {
+  width: 100,
+  height: 100,
+};
+
+const DEFAULT_RECTANGLE_ORIGIN_COORDINATES = {
+  x: 100,
+  y: 100,
+};
 
 const Landing = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+  const [rectangleOriginCoordinates, setRectangleOriginCoordinates] = useState({
+    x: 100,
+    y: 100,
+  });
 
-  const handleSubmitChanges = (params: OnSubmitChangesParams) => {
-    console.log(params);
+  const handleSubmitChanges = useCallback(
+    (params: OnSubmitChangesParams) => {
+      console.log(params);
+
+      const ctx = canvasRef.current?.getContext("2d");
+      if (!ctx) {
+        return;
+      }
+
+      if (
+        params.position &&
+        params.position.x !== rectangleOriginCoordinates.x &&
+        params.position.y !== rectangleOriginCoordinates.y
+      ) {
+        drawUtils.clearGridRectangle(
+          ctx,
+          rectangleOriginCoordinates.x,
+          rectangleOriginCoordinates.y,
+          DEFAULT_RECTANGLE_SIZE.width,
+          DEFAULT_RECTANGLE_SIZE.height,
+        );
+
+        setRectangleOriginCoordinates({
+          x: params.position.x,
+          y: params.position.y,
+        });
+
+        drawUtils.drawRectangle({
+          canvasContext: ctx,
+          width: DEFAULT_RECTANGLE_SIZE.width,
+          height: DEFAULT_RECTANGLE_SIZE.height,
+          positionX: params.position.x,
+          positionY: params.position.y,
+        });
+      }
+    },
+    [rectangleOriginCoordinates],
+  );
+
+  const drawRectangle = () => {
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) {
+      return;
+    }
+
+    drawUtils.drawRectangle({
+      canvasContext: ctx,
+      width: 100,
+      height: 100,
+      positionX: DEFAULT_RECTANGLE_ORIGIN_COORDINATES.x,
+      positionY: DEFAULT_RECTANGLE_ORIGIN_COORDINATES.y,
+    });
   };
 
   useEffect(() => {
@@ -58,17 +122,11 @@ const Landing = () => {
       height: canvas.height,
       axisWidth: 2,
       axisColor: "gray",
-      gridSpacing: 20,
+      gridSpacing: 50,
       gridWidth: 2,
     });
 
-    drawUtils.drawRectangle({
-      canvasContext: ctx,
-      width: 100,
-      height: 100,
-      positionX: 20,
-      positionY: 20,
-    });
+    drawRectangle();
   }, [canvasSize, canvasRef]);
 
   return (

@@ -1,5 +1,5 @@
 import { match } from "ts-pattern";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type TransformationType = "position" | "pivot";
 
@@ -12,24 +12,46 @@ export interface OnSubmitChangesParams {
 }
 
 interface ControllerProps {
-  originCoordinates?: { x: number; y: number };
+  rectangleOriginCoordinates?: { x: number; y: number };
+  rectangleSize?: { width: number; height: number };
   onSubmitChanges: (params: OnSubmitChangesParams) => void;
 }
 
 const Controller = ({
-  originCoordinates,
+  rectangleOriginCoordinates,
+  rectangleSize,
   onSubmitChanges,
 }: ControllerProps) => {
-  const pointsCoordinates = [
-    { x: 100, y: 100 },
-    { x: 200, y: 200 },
-    { x: 300, y: 300 },
-    { x: 400, y: 400 },
-  ];
-
   const [position, setPosition] = useState({ x: 0.0, y: 0.0 });
   const [rotation, setRotation] = useState(0.0);
   const [pivot, setPivot] = useState({ x: 0.0, y: 0.0 });
+
+  const pointsCoordinates = useMemo(() => {
+    if (!rectangleOriginCoordinates || !rectangleSize) {
+      return [
+        { x: 0, y: 0 },
+        { x: 0, y: 0 },
+        { x: 0, y: 0 },
+        { x: 0, y: 0 },
+      ];
+    }
+
+    return [
+      { x: rectangleOriginCoordinates?.x, y: rectangleOriginCoordinates?.y },
+      {
+        x: rectangleOriginCoordinates?.x + rectangleSize?.width,
+        y: rectangleOriginCoordinates?.y,
+      },
+      {
+        x: rectangleOriginCoordinates?.x + rectangleSize?.width,
+        y: rectangleOriginCoordinates?.y + rectangleSize?.height,
+      },
+      {
+        x: rectangleOriginCoordinates?.x,
+        y: rectangleOriginCoordinates?.y + rectangleSize?.height,
+      },
+    ];
+  }, [rectangleOriginCoordinates, rectangleSize]);
 
   const handleCoordinateChange = ({
     axis,
