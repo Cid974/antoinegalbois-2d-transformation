@@ -27,7 +27,32 @@ interface DrawAxesParams {
   axisColor: string;
   axisWidth: number;
   gridSpacing: number;
+}
 
+interface DrawRectangleParams {
+  canvasContext: CanvasRenderingContext2D;
+  width: number;
+  height: number;
+  positionX: number;
+  positionY: number;
+}
+
+
+const drawRectangle = ({canvasContext, width, height, positionX, positionY}: DrawRectangleParams) => {
+
+  const centerX = canvasContext.canvas.width / 2;
+  const centerY = canvasContext.canvas.height / 2;
+
+  const canvasX = centerX + positionX;
+  const canvasY = centerY - positionY - height;
+
+
+  canvasContext.strokeStyle = "black";
+  canvasContext.lineWidth = 1;
+  canvasContext.strokeRect(canvasX, canvasY, width, height);
+  
+  canvasContext.fillStyle = "lightgray";
+  canvasContext.fillRect(canvasX, canvasY, width, height);
 }
 
 const drawUnitMarks = ({canvasContext, width, height, centerX, centerY, gridSpacing, axisColor}: DrawUnitMarksParams) => {
@@ -63,18 +88,15 @@ const drawUnitMarks = ({canvasContext, width, height, centerX, centerY, gridSpac
       continue;
     }
     
-    // Draw tick mark
     canvasContext.beginPath();
     canvasContext.moveTo(centerX - tickLength / 2, y);
     canvasContext.lineTo(centerX + tickLength / 2, y);
     canvasContext.stroke();
     
-    // Calculate and draw label (negative because canvas Y increases downward)
     const unitValue = -Math.round((y - centerY) / gridSpacing);
     canvasContext.fillText(unitValue.toString(), centerX - tickLength / 2 - 2, y);
   }
 
-  // Draw origin label (0,0)
   canvasContext.textAlign = 'right';
   canvasContext.textBaseline = 'top';
   canvasContext.fillText('0', centerX - 5, centerY + 5);
@@ -105,7 +127,7 @@ const drawOrigin = (canvasContext: CanvasRenderingContext2D, centerX: number, ce
 };
 
 
-export const drawCoordinateGrid = (canvasContext: CanvasRenderingContext2D, options: CoordinateGridOptions) => {
+const drawCoordinateGrid = (canvasContext: CanvasRenderingContext2D, options: CoordinateGridOptions) => {
   const { width, height, axisWidth, axisColor, gridSpacing } = options;
 
   if (!canvasContext) {
@@ -125,3 +147,10 @@ export const drawCoordinateGrid = (canvasContext: CanvasRenderingContext2D, opti
 
   drawOrigin(canvasContext, centerX, centerY, axisColor);
 };
+
+const drawUtils = {
+  drawCoordinateGrid,
+  drawRectangle,
+};
+
+export default drawUtils;

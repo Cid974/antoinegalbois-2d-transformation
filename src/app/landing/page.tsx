@@ -1,6 +1,6 @@
 "use client";
 import Controller, { OnSubmitChangesParams } from "@/components/controller";
-import { drawCoordinateGrid } from "@/utils/drawCoordinateGrid";
+import drawUtils from "@/utils/drawUtils";
 import { useEffect, useRef, useState } from "react";
 
 const Landing = () => {
@@ -52,13 +52,22 @@ const Landing = () => {
     if (!ctx) {
       return;
     }
-    drawCoordinateGrid(ctx, {
+
+    drawUtils.drawCoordinateGrid(ctx, {
       width: canvas.width,
       height: canvas.height,
       axisWidth: 2,
       axisColor: "gray",
       gridSpacing: 20,
       gridWidth: 2,
+    });
+
+    drawUtils.drawRectangle({
+      canvasContext: ctx,
+      width: 100,
+      height: 100,
+      positionX: 20,
+      positionY: 20,
     });
   }, [canvasSize, canvasRef]);
 
