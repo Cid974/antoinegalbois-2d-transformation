@@ -34,7 +34,12 @@ const Landing = () => {
   const handleSubmitChanges = (params: TransformationData) => {
     console.log(params)
 
+    if (!canvasRef.current) {
+      return
+    }
+
     const ctx = canvasRef.current?.getContext('2d')
+
     if (!ctx) {
       return
     }
@@ -46,20 +51,25 @@ const Landing = () => {
     const pivotY = parseFloat(params.pivotY)
 
     if (
-      positionX !== rectangleOriginCoordinates.x &&
+      positionX !== rectangleOriginCoordinates.x ||
       positionY !== rectangleOriginCoordinates.y
     ) {
-      drawUtils.clearRectangle(
-        ctx,
-        rectangleOriginCoordinates.x,
-        rectangleOriginCoordinates.y,
-        DEFAULT_RECTANGLE_SIZE.width,
-        DEFAULT_RECTANGLE_SIZE.height,
-      )
+      drawUtils.drawCoordinateGrid(ctx, {
+        width: canvasRef.current.width,
+        height: canvasRef.current.height,
+        axisWidth: 2,
+        axisColor: 'gray',
+        gridSpacing: 50,
+        gridWidth: 2,
+      })
+
+      ctx.save()
 
       ctx.setTransform(1, 0, 0, 1, positionX, -positionY)
 
       drawRectangle(rectangleOriginCoordinates.x, rectangleOriginCoordinates.y)
+
+      ctx.restore()
 
       setRectangleOriginCoordinates({
         x: positionX + rectangleOriginCoordinates.x,
