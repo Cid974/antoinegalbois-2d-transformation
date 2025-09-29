@@ -1,5 +1,5 @@
 import {match} from 'ts-pattern'
-import {useMemo, useState} from 'react'
+import {useCallback, useEffect, useMemo, useState} from 'react'
 import z from 'zod'
 import {transformationSchema} from '@/schema/transformationSchema'
 import transformUtils from '@/utils/transformUtils'
@@ -33,24 +33,16 @@ const Controller = ({
     pivotY: '',
   })
 
+  const [rectangleCorners, setRectangleCorners] = useState<
+    {x: number; y: number}[]
+  >([
+    {x: 0, y: 0},
+    {x: 0, y: 0},
+    {x: 0, y: 0},
+    {x: 0, y: 0},
+  ])
+
   const [errors, setErrors] = useState<ValidationErrors>({})
-
-  const pointsCoordinates = useMemo(() => {
-    if (!rectangleOriginCoordinates || !rectangleSize) {
-      return [
-        {x: 0, y: 0},
-        {x: 0, y: 0},
-        {x: 0, y: 0},
-        {x: 0, y: 0},
-      ]
-    }
-
-    return transformUtils.retrieveRectangleCorners({
-      rectangleOriginCoordinates,
-      rectangleSize,
-      rotation: parseFloat(formData.rotation),
-    })
-  }, [formData.rotation, rectangleOriginCoordinates, rectangleSize])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {name, value} = e.target
@@ -69,6 +61,23 @@ const Controller = ({
     }
   }
 
+  const updateRectangleCorners = useCallback(
+    (rotation: number) => {
+      if (!rectangleOriginCoordinates || !rectangleSize) {
+        return
+      }
+
+      const rectangleCorners = transformUtils.retrieveRectangleCorners({
+        rectangleOriginCoordinates,
+        rectangleSize,
+        rotation: rotation,
+      })
+
+      setRectangleCorners(rectangleCorners)
+    },
+    [rectangleOriginCoordinates, rectangleSize],
+  )
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -85,6 +94,7 @@ const Controller = ({
     } else {
       // Form is valid
       setErrors({})
+
       const transformedData = {
         positionX: result.data.positionX
           ? parseFloat(result.data.positionX)
@@ -97,16 +107,24 @@ const Controller = ({
         pivotY: result.data.pivotY ? parseFloat(result.data.pivotY) : '0',
       }
 
+      updateRectangleCorners(
+        result.data.rotation ? parseFloat(result.data.rotation) : 0,
+      )
+
       onSubmitChanges(transformedData as TransformationData)
     }
   }
+
+  useEffect(() => {
+    updateRectangleCorners(0)
+  }, [updateRectangleCorners])
 
   return (
     <div className="flex flex-col gap-4 rounded-md border-2 border-gray-400 p-10">
       <div>
         <h1>Controller</h1>
         <div className="w-full rounded-md border-2 border-gray-300 p-2">
-          {pointsCoordinates.map((point, index) => (
+          {rectangleCorners.map((point, index) => (
             <div key={index}>
               {match(index)
                 .with(0, () => (
